@@ -49,8 +49,10 @@ app.post('/profile-pic', upload.single('profilePic'), async (req, res) => {
 	}
 });
 
-app.use(cors());
-
+app.use(cors({
+    origin: `${process.env.CLIENT_URL}`
+  }))
+  
 app.post("/userdata", async (req, res) => {
 	const body = req.body
 	console.log(body)
