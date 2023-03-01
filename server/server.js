@@ -41,8 +41,7 @@ app.post('/profile-pic', upload.single('profilePic'), async (req, res) => {
 		};
 
 		// Return the URL of the updated image
-		//const imageUrl = `http://localhost:${PORT}/public/images/profiles/${req.file.filename}`;
-		const imageUrl = `${PORT}/public/images/profiles/${req.file.filename}`;
+		const imageUrl = `http://localhost:${PORT}/public/images/profiles/${req.file.filename}`;
 		res.json({ imageUrl });
 	} catch (error) {
 		console.error(error);
