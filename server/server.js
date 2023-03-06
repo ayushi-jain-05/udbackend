@@ -129,16 +129,32 @@ app.get("/getuser", async (req, res) => {
 	const user = await User.findOne({ email });
 	return res.json(user);
 })
-
+app.get('/fetchsearchdata/:key', async (req,res)=>{
+	try{
+		const key = req.params.key;
+	const regexKey = new RegExp(key, "i");
+	const searchCriteria =
+	 {
+		"$or": [
+		{"firstName": {$regex: regexKey}},
+		{"lastName": {$regex: regexKey}},
+		{"email": {$regex: regexKey}},
+		{"Mobile": {$regex: regexKey}},
+		]
+	}
+		const user = await User.find(searchCriteria).sort("firstName");
+		const totalResults = user.length;
+		res.json({user,totalResults});
+	}catch(error){
+		res.status(500).send(error);
+	}
+})
 app.get('/fetchdata', async (req, res) => {
-	const page = req.query.page || 1;
-	const limit = req.query.limit || 2;
-	const startIndex = (page - 1) * limit;
-	const endIndex = page * limit;
 	const totalResults = await User.countDocuments();
-	const user = await User.find().limit(limit).skip(startIndex).exec();
+	const user = await User.find();
 	return res.json({ user, totalResults });
 })
+
 
 const PORT = process.env.PORT || 8080;
 app.listen(PORT, () => console.log(`Listenting on port ${PORT}...`));
