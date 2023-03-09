@@ -145,7 +145,7 @@ app.get('/fetchsearchdata/:key', async (req,res)=>{
 })
 app.get('/fetchdata', async (req, res) => {
 	const totalResults = await User.countDocuments();
-	const user = await User.find();
+	const user = await User.find().sort({createdAt: -1});
 	return res.json({ user, totalResults });
 })
 
