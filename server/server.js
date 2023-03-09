@@ -91,16 +91,13 @@ app.patch("/editprofile/:email", upload.single('profileImage'), async (req, res)
 		}
 
 		let newUser = {
-			id: body.id,
-			name: body.name,
 			firstName: body.firstName,
 			lastName: body.lastName,
-			Mobile: body.Mobile,
-			Gender: body.Gender,
-			DateofBirth: body.DateofBirth,
+			Mobile: body.mobileNumber,
+			Gender: body.gender,
+			DateofBirth: body.dob,
 			aboutme: body.aboutme,
 		};
-		
 		if(req.file){
 			const imagePath = path.join(__dirname, 'public/images/profiles', req.file.filename);
 			newUser={
