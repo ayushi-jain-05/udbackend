@@ -55,7 +55,6 @@ app.use(cors({
   
 app.post("/userdata", async (req, res) => {
 	const body = req.body
-	console.log(body)
 	let newUser = {
 		id: body.id,
 		name: body.name,
@@ -106,7 +105,6 @@ app.patch("/editprofile/:email", upload.single('profileImage'), async (req, res)
 			}
 		}
 		user = await User.updateOne({ email: req.params.email }, { $set: newUser });
-		console.log(req.file);
 		return res.status(200).send("Successfully Updated");
         
 	} catch (err) {
@@ -116,7 +114,6 @@ app.patch("/editprofile/:email", upload.single('profileImage'), async (req, res)
 });
 
 app.get('/fetchdata/:email', async (req, res) => {
-	console.log(req.params.email);
 	const user = await User.findOne({ email: req.params.email });
 	res.json(user);
 })
