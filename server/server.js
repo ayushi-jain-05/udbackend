@@ -5,13 +5,11 @@ const express = require("express");
 const cors = require("cors");
 const app = express();
 const multer = require('multer');
-const connectDB = require('./db')
-const User = require('../server/models/User')
+const connectDB = require('./db');
+const User = require('../server/models/User');
 app.use(express.json());
 app.use("/", express.static("/"));
-connectDB()
-
-
+connectDB();
 
 // Set up the multer middleware for file upload
 const storage = multer.diskStorage({
@@ -26,9 +24,7 @@ const storage = multer.diskStorage({
 		cb(null, `${req.params.email}-${Date.now()}${path.extname(file.originalname)}`);
 	},
 });
-
 const upload = multer({ storage: storage });
-
 app.post('/profile-pic', upload.single('profilePic'), async (req, res) => {
 	try {
 		console.log(req.file);
@@ -39,7 +35,6 @@ app.post('/profile-pic', upload.single('profilePic'), async (req, res) => {
 			image: path.join(__dirname, req.file.path),
 			user_id: req.user.id 
 		};
-
 		// Return the URL of the updated image
 		const imageUrl = `http://localhost:${PORT}/public/images/profiles/${req.file.filename}`;
 		res.json({ imageUrl });
@@ -82,13 +77,10 @@ app.post("/userdata", async (req, res) => {
 app.patch("/editprofile/:email", upload.single('profileImage'), async (req, res) => {
 	try {
 		const body = req.body;
-
 		let user = await User.findOne({ email: req.params.email });
-
 		if (!user) {
 			return res.status(404).send({ msg: 'User not found' });
 		}
-
 		let newUser = {
 			firstName: body.firstName,
 			lastName: body.lastName,
@@ -117,14 +109,18 @@ app.get('/fetchdata/:email', async (req, res) => {
 	const user = await User.findOne({ email: req.params.email });
 	res.json(user);
 })
-
 app.get("/getuser", async (req, res) => {
 	let { email } = req.query;
 	const user = await User.findOne({ email });
 	return res.json(user);
 })
+
+// Searching route
 app.get('/fetchsearchdata/:key', async (req,res)=>{
 	try{
+		const page = req.query.page ||1;
+	const limit = req.query.limit || 4;
+	const startIndex = (page-1) *limit;
 		const key = req.params.key;
 	const regexKey = new RegExp(key, "i");
 	const searchCriteria =
@@ -133,22 +129,23 @@ app.get('/fetchsearchdata/:key', async (req,res)=>{
 		{"firstName": {$regex: regexKey}},
 		{"lastName": {$regex: regexKey}},
 		{"email": {$regex: regexKey}},
-		{"Mobile": {$regex: regexKey}},
-		]
+		{"Mobile": {$regex: regexKey}},]
 	}
-		const user = await User.find(searchCriteria).sort("firstName");
-		const totalResults = user.length;
+		const user = await User.find(searchCriteria).limit(limit).skip(startIndex).sort("firstName");
+		const totalResults = await User.find(searchCriteria).countDocuments();
 		res.json({user,totalResults});
 	}catch(error){
 		res.status(500).send(error);
 	}
 })
 app.get('/fetchdata', async (req, res) => {
+
+	const page = req.query.page ||1;
+	const limit = req.query.limit || 4;
+	const startIndex = (page-1) *limit;
 	const totalResults = await User.countDocuments();
-	const user = await User.find().sort({createdAt: -1});
+	const user = await User.find().limit(limit).skip(startIndex).sort({createdAt: -1});
 	return res.json({ user, totalResults });
 })
-
-
 const PORT = process.env.PORT || 8080;
 app.listen(PORT, () => console.log(`Listenting on port ${PORT}...`));
